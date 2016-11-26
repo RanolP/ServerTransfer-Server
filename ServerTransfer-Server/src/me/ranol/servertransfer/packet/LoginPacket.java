@@ -27,6 +27,7 @@ public class LoginPacket implements Packet {
 	public boolean ping(DataInputStream in) throws IOException {
 		id = in.readUTF();
 		pwd = in.readUTF();
+		AuthService.getAccount(id, pwd).setSalt(in.readUTF());
 		return AuthService.canLogin(id, pwd);
 	}
 

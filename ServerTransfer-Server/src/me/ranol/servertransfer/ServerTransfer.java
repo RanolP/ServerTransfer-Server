@@ -111,6 +111,7 @@ public class ServerTransfer {
 		tbtmAccountManagement.setControl(composite_1);
 
 		List accounts = new List(composite_1, SWT.BORDER);
+		AuthService.connect(accounts);
 		accounts.setBounds(0, 0, 280, 378);
 
 		text = new Text(composite_1, SWT.BORDER);

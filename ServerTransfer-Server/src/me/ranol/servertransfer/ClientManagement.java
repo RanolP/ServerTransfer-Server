@@ -57,6 +57,14 @@ public class ClientManagement implements Runnable {
 				Packet p = Packets.valueOf(type);
 				if (p == null)
 					continue;
+				if (!(p instanceof LoginPacket)) {
+					if (!in.readUTF().equals(auth.salt)) {
+						System.out.println("Salt 값이 맞지 않습니다.");
+						client.close();
+						Clients.removeClient(this);
+						break;
+					}
+				}
 				if (p.ping(in)) {
 					p.pong(out, true);
 					if (p instanceof LoginPacket) {

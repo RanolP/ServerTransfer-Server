@@ -2,17 +2,31 @@ package me.ranol.servertransfer;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.UUID;
+
+import org.eclipse.swt.widgets.List;
 
 public class AuthService {
 	private static HashMap<Auth, String> uuid = new HashMap<>();
+	private static List list;
 
 	private AuthService() {
+	}
+
+	public static void connect(List list) {
+		AuthService.list = list;
+	}
+
+	public static void forceUpdate() {
+		list.removeAll();
+		list.setItems(uuid.keySet().stream().map(Auth::toString).collect(Collectors.toList()).toArray(new String[0]));
 	}
 
 	public static class Auth {
 		String id;
 		String pwd;
+		String salt = "";
 
 		public Auth() {
 			this("guest");
@@ -25,6 +39,10 @@ public class AuthService {
 		public Auth(String id, String pwd) {
 			this.id = id;
 			this.pwd = pwd;
+		}
+
+		public void setSalt(String salt) {
+			this.salt = salt;
 		}
 
 		@Override
@@ -43,26 +61,43 @@ public class AuthService {
 			if (!(obj instanceof Auth))
 				return false;
 			Auth a = (Auth) obj;
-			return a.pwd.equals(pwd) && a.id.equals(id);
+			return a.pwd.equals(pwd) && a.id.equals(id) && a.salt.equals(salt);
 		}
 
 		public boolean equalsFullyHash(Object obj) {
 			if (!(obj instanceof Auth))
 				return false;
 			Auth a = (Auth) obj;
-			return PasswordSaver.hashing(a.pwd).equals(pwd) && a.id.equals(id);
+			return PasswordSaver.hashing(a.pwd).equals(pwd) && a.id.equals(id) && a.salt.equals(salt);
 		}
 
 		@Override
 		public String toString() {
-			return "Auth [" + id + ", " + pwd + "]";
+			return "Auth [" + id + ", " + pwd + ", Salt=" + salt + "]";
 		}
+
+		public boolean equalsHash(Object obj) {
+			if (!(obj instanceof Auth))
+				return false;
+			Auth a = (Auth) obj;
+			return PasswordSaver.hashing(a.pwd).equals(pwd) && a.id.equals(id);
+		}
+	}
+
+	public static boolean canLogin(String id, String pwd, String salt) {
+		Auth auth = new Auth(id, pwd);
+		auth.setSalt(salt);
+		for (Auth a : uuid.keySet()) {
+			if (auth.equalsFullyHash(a))
+				return true;
+		}
+		return false;
 	}
 
 	public static boolean canLogin(String id, String pwd) {
 		Auth auth = new Auth(id, pwd);
 		for (Auth a : uuid.keySet()) {
-			if (auth.equalsFullyHash(a))
+			if (auth.equalsHash(a))
 				return true;
 		}
 		return false;
@@ -86,6 +121,7 @@ public class AuthService {
 		while (uuid.containsKey(uid.toString()))
 			uid = UUID.randomUUID();
 		uuid.put(temp, uid.toString());
+		list.add(temp.toString());
 		return uid.toString();
 	}
 
