@@ -23,72 +23,22 @@ public class AuthService {
 		list.setItems(uuid.keySet().stream().map(Auth::toString).collect(Collectors.toList()).toArray(new String[0]));
 	}
 
-	public static class Auth {
-		String id;
-		String pwd;
-		String salt = "";
-
-		public Auth() {
-			this("guest");
-		}
-
-		public Auth(String id) {
-			this(id, "guest");
-		}
-
-		public Auth(String id, String pwd) {
-			this.id = id;
-			this.pwd = pwd;
-		}
-
-		public void setSalt(String salt) {
-			this.salt = salt;
-		}
-
-		@Override
-		public int hashCode() {
-			int result = 13;
-			int c = id.hashCode();
-			return 31 * result + c;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return obj instanceof Auth && obj.hashCode() == hashCode();
-		}
-
-		public boolean equalsFully(Object obj) {
-			if (!(obj instanceof Auth))
-				return false;
-			Auth a = (Auth) obj;
-			return a.pwd.equals(pwd) && a.id.equals(id) && a.salt.equals(salt);
-		}
-
-		public boolean equalsFullyHash(Object obj) {
-			if (!(obj instanceof Auth))
-				return false;
-			Auth a = (Auth) obj;
-			return PasswordSaver.hashing(a.pwd).equals(pwd) && a.id.equals(id) && a.salt.equals(salt);
-		}
-
-		@Override
-		public String toString() {
-			return "Auth [" + id + ", " + pwd + ", Salt=" + salt + "]";
-		}
-
-		public boolean equalsHash(Object obj) {
-			if (!(obj instanceof Auth))
-				return false;
-			Auth a = (Auth) obj;
-			return PasswordSaver.hashing(a.pwd).equals(pwd) && a.id.equals(id);
-		}
-	}
-
 	public static boolean canLogin(String id, String pwd, String salt) {
 		Auth auth = new Auth(id, pwd);
 		auth.setSalt(salt);
 		for (Auth a : uuid.keySet()) {
 			if (auth.equalsFullyHash(a))
+				return true;
+		}
+		return false;
+	}
+
+	public static boolean alreadyLogined(String id, String pwd) {
+		if (!canLogin(id, pwd))
+			return false;
+		Auth auth = new Auth(id, pwd);
+		for (Auth a : Clients.clients().stream().map(c -> c.auth).collect(Collectors.toList())) {
+			if (auth.equalsHash(a))
 				return true;
 		}
 		return false;
@@ -169,5 +119,21 @@ public class AuthService {
 			}
 		}
 		return new Auth(id, pwd);
+	}
+
+	public static String getNickname(String uid) {
+		if (uuid.containsValue(uid)) {
+			Auth key = null;
+			for (Entry<Auth, String> e : uuid.entrySet()) {
+				if (e.getValue().equals(uid)) {
+					key = e.getKey();
+					break;
+				}
+			}
+			if (key != null) {
+				return key.nickname;
+			}
+		}
+		return uid;
 	}
 }

@@ -131,7 +131,7 @@ public class ServerTransfer {
 		newAccount.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				AuthDialog ad = new AuthDialog(shell, SWT.NONE);
+				AuthDialog ad = new AuthDialog(shell, SWT.TITLE);
 				ad.open();
 			}
 		});

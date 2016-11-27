@@ -9,7 +9,9 @@ public enum Packets {
 
 	LOG(new LogPacket()),
 
-	LOGOUT(new LogoutPacket());
+	LOGOUT(new LogoutPacket()),
+
+	CONNECT(new ConnectPacket());
 	Packet packet;
 
 	Packets(Packet packet) {

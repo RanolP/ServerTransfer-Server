@@ -5,18 +5,23 @@ import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 
-import me.ranol.servertransfer.AuthService.Auth;
+import me.ranol.servertransfer.packet.ConnectPacket;
+import me.ranol.servertransfer.packet.KickPacket;
 import me.ranol.servertransfer.packet.LoginPacket;
 import me.ranol.servertransfer.packet.LogoutPacket;
 import me.ranol.servertransfer.packet.Packet;
 import me.ranol.servertransfer.packet.Packets;
+import me.ranol.servertransfer.packet.SendablePacket;
 
 public class ClientManagement implements Runnable {
 	Socket client;
+	Socket recieve;
+	DataOutputStream rout;
 	Thread thread;
 	DataInputStream in;
 	DataOutputStream out;
 	Auth auth = new Auth();
+	boolean run = true;
 
 	public ClientManagement(Socket soc) {
 		this.client = soc;
@@ -42,7 +47,7 @@ public class ClientManagement implements Runnable {
 
 	@Override
 	public void run() {
-		while (true) {
+		while (run) {
 			try {
 				byte[] data = new byte[4];
 				in.readFully(data);
@@ -57,7 +62,14 @@ public class ClientManagement implements Runnable {
 				Packet p = Packets.valueOf(type);
 				if (p == null)
 					continue;
-				if (!(p instanceof LoginPacket)) {
+				if (p instanceof ConnectPacket) {
+					if (!in.readUTF().equals(Clients.last().auth.salt)) {
+						System.out.println("Salt 값이 맞지 않습니다.");
+						client.close();
+						Clients.removeClient(Clients.last());
+						break;
+					}
+				} else if (!(p instanceof LoginPacket)) {
 					if (!in.readUTF().equals(auth.salt)) {
 						System.out.println("Salt 값이 맞지 않습니다.");
 						client.close();
@@ -67,6 +79,11 @@ public class ClientManagement implements Runnable {
 				}
 				if (p.ping(in)) {
 					p.pong(out, true);
+					if (p instanceof ConnectPacket) {
+						Clients.last().setRecieve(client);
+						System.out.println("Recieve 설정됨!");
+						break;
+					}
 					if (p instanceof LoginPacket) {
 						LoginPacket l = (LoginPacket) p;
 						setAuth(l.getAuth());
@@ -90,8 +107,28 @@ public class ClientManagement implements Runnable {
 		}
 	}
 
+	private void setRecieve(Socket soc) {
+		this.recieve = soc;
+		try {
+			rout = new DataOutputStream(recieve.getOutputStream());
+		} catch (Exception e) {
+		}
+	}
+
 	@Override
 	public String toString() {
 		return client.getInetAddress().getHostAddress() + " / " + auth.toString();
+	}
+
+	public void sendPacket(SendablePacket packet) {
+		try {
+			packet.pong(rout, true);
+		} catch (Exception e) {
+		}
+	}
+
+	public void close() {
+		sendPacket(new KickPacket());
+		run = false;
 	}
 }

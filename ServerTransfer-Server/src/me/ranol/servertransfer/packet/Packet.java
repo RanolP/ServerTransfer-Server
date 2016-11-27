@@ -4,11 +4,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public interface Packet {
+public interface Packet extends SendablePacket {
 
 	static final byte[] MAGIC = { 127, -128, 127, -128 };
-
-	public int id();
 
 	public boolean ping(DataInputStream in) throws IOException;
 
