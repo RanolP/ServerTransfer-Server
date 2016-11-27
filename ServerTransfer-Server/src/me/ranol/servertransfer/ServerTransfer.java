@@ -17,6 +17,8 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import me.ranol.servertransfer.swtutil.MessageView;
+
 public class ServerTransfer {
 	public static Shell shell;
 	private ServerManagement manager;
@@ -108,6 +110,10 @@ public class ServerTransfer {
 		kick.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				if (users.getSelectionIndex() == -1) {
+					MessageView.info(shell).message("유저 선택 후 킥 해주세요!").title("오류").open();
+					return;
+				}
 				Clients.removeClient(users.getSelectionIndex());
 			}
 		});

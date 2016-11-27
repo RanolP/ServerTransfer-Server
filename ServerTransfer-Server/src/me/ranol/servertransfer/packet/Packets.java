@@ -11,7 +11,11 @@ public enum Packets {
 
 	LOGOUT(new LogoutPacket()),
 
-	CONNECT(new ConnectPacket());
+	CONNECT(new ConnectPacket()),
+
+	FILE(new FilePacket()),
+
+	FILELIST(new FileListPacket());
 	Packet packet;
 
 	Packets(Packet packet) {
