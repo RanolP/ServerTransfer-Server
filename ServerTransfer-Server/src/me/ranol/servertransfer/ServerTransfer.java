@@ -22,7 +22,7 @@ public class ServerTransfer {
 	private ServerManagement manager;
 	Image imgStart = SWTResourceManager.getImage(ServerTransfer.class, "/image/start.png");
 	Image imgStarted = SWTResourceManager.getImage(ServerTransfer.class, "/image/started.png");
-	private Text text;
+	private Text PW;
 
 	/**
 	 * Launch the application.
@@ -63,6 +63,7 @@ public class ServerTransfer {
 		shell.setText("Server Transfer - Server");
 
 		shell.addListener(SWT.Close, e -> {
+			Clients.kickAll();
 			System.exit(-1);
 		});
 
@@ -103,6 +104,17 @@ public class ServerTransfer {
 		Clients.updator(users);
 		users.setBounds(0, 0, 300, 378);
 
+		Button kick = new Button(composite_2, SWT.NONE);
+		kick.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Clients.removeClient(users.getSelectionIndex());
+			}
+		});
+		kick.setFont(SWTResourceManager.getFont("맑은 고딕", 12, SWT.NORMAL));
+		kick.setBounds(306, 333, 150, 35);
+		kick.setText("Kick User");
+
 		TabItem tbtmAccountManagement = new TabItem(allTabs, SWT.NONE);
 		tbtmAccountManagement.setImage(SWTResourceManager.getImage(ServerTransfer.class, "/image/account.png"));
 		tbtmAccountManagement.setText("Accounts");
@@ -114,13 +126,13 @@ public class ServerTransfer {
 		AuthService.connect(accounts);
 		accounts.setBounds(0, 0, 280, 378);
 
-		text = new Text(composite_1, SWT.BORDER);
-		text.setFont(SWTResourceManager.getFont("맑은 고딕", 12, SWT.NORMAL));
-		text.setBounds(286, 40, 200, 35);
+		PW = new Text(composite_1, SWT.BORDER);
+		PW.setFont(SWTResourceManager.getFont("맑은 고딕", 12, SWT.NORMAL));
+		PW.setBounds(286, 40, 200, 35);
 
-		Button btnNewButton = new Button(composite_1, SWT.NONE);
-		btnNewButton.setBounds(492, 38, 84, 35);
-		btnNewButton.setText("Apply");
+		Button applyPW = new Button(composite_1, SWT.NONE);
+		applyPW.setBounds(492, 38, 84, 35);
+		applyPW.setText("Apply");
 
 		Label lblNewLabel = new Label(composite_1, SWT.NONE);
 		lblNewLabel.setFont(SWTResourceManager.getFont("맑은 고딕", 12, SWT.BOLD));

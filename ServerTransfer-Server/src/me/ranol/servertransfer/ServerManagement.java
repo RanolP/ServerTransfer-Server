@@ -2,7 +2,6 @@ package me.ranol.servertransfer;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -49,9 +48,7 @@ public class ServerManagement extends Thread {
 	}
 
 	public void stopWork() {
-		new ArrayList<>(Clients.clients()).forEach(c -> {
-			Clients.removeClient(c);
-		});
+		Clients.kickAll();
 		checkEnabled = false;
 	}
 

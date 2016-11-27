@@ -4,7 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import me.ranol.servertransfer.Connectors;
+import me.ranol.servertransfer.AuthService;
 
 public class LogoutPacket implements Packet {
 	String id;
@@ -18,7 +18,7 @@ public class LogoutPacket implements Packet {
 	@Override
 	public boolean ping(DataInputStream in) throws IOException {
 		String uuid = in.readUTF();
-		Connectors.remove(uuid);
+		AuthService.logout(uuid);
 		return true;
 	}
 

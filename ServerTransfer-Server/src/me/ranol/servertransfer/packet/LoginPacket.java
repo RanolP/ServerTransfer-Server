@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import me.ranol.servertransfer.Auth;
 import me.ranol.servertransfer.AuthService;
-import me.ranol.servertransfer.Connectors;
 
 public class LoginPacket implements Packet {
 	String id;
@@ -50,7 +49,6 @@ public class LoginPacket implements Packet {
 			return;
 		String uuid = AuthService.getUUID(id);
 		out.writeUTF(uuid);
-		Connectors.add(uuid);
 	}
 
 	public Auth getAuth() {

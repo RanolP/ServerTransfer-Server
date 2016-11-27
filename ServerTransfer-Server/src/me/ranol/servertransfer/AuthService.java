@@ -63,6 +63,16 @@ public class AuthService {
 		return uuid.get(new Auth(id));
 	}
 
+	public static Auth getByUID(String uid) {
+		Auth key = null;
+		for (Entry<Auth, String> entry : uuid.entrySet()) {
+			if (entry.getValue().equals(uid)) {
+				key = entry.getKey();
+			}
+		}
+		return key;
+	}
+
 	public static String newAccount(String id, String pwd) {
 		if (uuid.containsKey(new Auth(id)))
 			return uuid.get(new Auth(id));
@@ -77,13 +87,7 @@ public class AuthService {
 
 	public static boolean removeByUUID(String uid) {
 		if (uuid.containsValue(uid)) {
-			Auth key = null;
-			for (Entry<Auth, String> e : uuid.entrySet()) {
-				if (e.getValue().equals(uid)) {
-					key = e.getKey();
-					break;
-				}
-			}
+			Auth key = getByUID(uid);
 			if (key != null) {
 				uuid.remove(key);
 				return true;
@@ -122,18 +126,25 @@ public class AuthService {
 	}
 
 	public static String getNickname(String uid) {
-		if (uuid.containsValue(uid)) {
-			Auth key = null;
-			for (Entry<Auth, String> e : uuid.entrySet()) {
-				if (e.getValue().equals(uid)) {
-					key = e.getKey();
-					break;
-				}
-			}
+		if (exists(uid)) {
+			Auth key = getByUID(uid);
 			if (key != null) {
 				return key.nickname;
 			}
 		}
 		return uid;
+	}
+
+	public static void logout(String uid) {
+		if (exists(uid)) {
+			Auth key = getByUID(uid);
+			if (key != null) {
+				logout(key);
+			}
+		}
+	}
+
+	public static void logout(Auth key) {
+		Clients.clients().stream().filter(c -> c.auth.equalsFully(key)).forEach(Clients::removeClient);
 	}
 }

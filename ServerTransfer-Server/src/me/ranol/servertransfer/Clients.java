@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import me.ranol.servertransfer.packet.KickPacket;
 import me.ranol.servertransfer.packet.SWTRun;
 
 public class Clients {
@@ -41,5 +40,17 @@ public class Clients {
 
 	public static void updator(org.eclipse.swt.widgets.List users) {
 		instance.l = users;
+	}
+
+	public static void removeClient(int i) {
+		removeClient(instance.clients.get(i));
+	}
+
+	public static void kickAll() {
+		for (ClientManagement client : clients()) {
+			client.close();
+		}
+		SWTRun.runAsync(Clients::forceUpdate);
+		instance.clients.clear();
 	}
 }
