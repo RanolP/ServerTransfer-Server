@@ -3,6 +3,7 @@ package me.ranol.servertransfer;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Arrays;
 
 import me.ranol.servertransfer.packet.ConnectPacket;
@@ -102,7 +103,12 @@ public class ClientManagement implements Runnable {
 					Clients.removeClient(this);
 					break;
 				}
+			} catch (SocketException e) {
+				if ("Connection reset".equals(e.getMessage())) {
+					close();
+				}
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -128,7 +134,7 @@ public class ClientManagement implements Runnable {
 	}
 
 	public void close() {
-		sendPacket(new KickPacket());
 		run = false;
+		sendPacket(new KickPacket());
 	}
 }
